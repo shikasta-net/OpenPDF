@@ -197,7 +197,7 @@ public abstract class DocWriter implements DocListener {
  * @return  <CODE>true</CODE> if the page was added, <CODE>false</CODE> if not.
  */
 
-    public boolean newPage() {
+    public boolean newPage() throws DocumentException {
         if (!open) {
             return false;
         }
@@ -214,8 +214,10 @@ public abstract class DocWriter implements DocListener {
  * @param header    the new header
  */
 
+/* ssteward: dropped in 1.44*/
     public void setHeader(HeaderFooter header) {
     }
+/**/
 
 /**
  * Resets the header of this document.
@@ -238,8 +240,10 @@ public abstract class DocWriter implements DocListener {
  * @param footer    the new footer
  */
 
+/* ssteward: dropped in 1.44*/
     public void setFooter(HeaderFooter footer) {
     }
+/**/
 
 /**
  * Resets the footer of this document.
@@ -454,6 +458,29 @@ public abstract class DocWriter implements DocListener {
     	return true;
     }
 
+    protected boolean writeMarkupAttributes(MarkupAttributes mAtt)
+     throws IOException
+    {
+      Iterator attributeIterator = mAtt.getMarkupAttributeNames().iterator();
+      boolean result = attributeIterator.hasNext();
+      while (attributeIterator.hasNext()) {
+        String name = String.valueOf(attributeIterator.next());
+        write(name, mAtt.getMarkupAttribute(name));
+      }
+      return result;
+    }
+
+/**
+ * Returns <CODE>true</CODE> if the specified <CODE>Element</CODE> implements
+ * <CODE>MarkupAttributes</CODE> and has one or more attributes to write.
+ * @param element   the <CODE>Element</CODE> to check.
+ * @return <CODE>boolean</CODE>.
+ */
+    protected static boolean hasMarkupAttributes(Element element) {
+      return (element instanceof MarkupAttributes &&
+       !(((MarkupAttributes)element).getMarkupAttributeNames().isEmpty()));
+    }
+
     /** Checks if the stream is to be closed on document close
      * @return true if the stream is closed on document close
      *
@@ -477,6 +504,13 @@ public abstract class DocWriter implements DocListener {
         return false;
     }
     
+	/**
+	 * @see pdftk.com.lowagie.text.DocListener#clearTextWrap()
+	 */
+	public void clearTextWrap() throws DocumentException {
+		// do nothing
+	}
+
     /**
      * @see com.lowagie.text.DocListener#setMarginMirroring(boolean)
      * @since	2.1.6

@@ -1,5 +1,5 @@
 /*
- * $Id: PRTokeniser.java 4083 2009-10-30 21:25:10Z trumpetinc $
+ * $Id: PRTokeniser.java 2015-08-05 15:42:10Z kym $
  *
  * Copyright 2001, 2002 by Paulo Soares.
  *
@@ -100,12 +100,12 @@ public class PRTokeniser {
     static final String EMPTY = "";
 
     
-    protected RandomAccessFileOrArray file;
-    protected int type;
-    protected String stringValue;
-    protected int reference;
-    protected int generation;
-    protected boolean hexString;
+    protected RandomAccessFileOrArray file = null;
+    protected int type = 0;
+    protected String stringValue = "";
+    protected int reference = 0;
+    protected int generation = 0;
+    protected boolean hexString = false;
        
     public PRTokeniser(String filename) throws IOException {
         file = new RandomAccessFileOrArray(filename);
@@ -139,7 +139,7 @@ public class PRTokeniser {
         return file.read();
     }
     
-    public RandomAccessFileOrArray getSafeFile() {
+    public RandomAccessFileOrArray getSafeFile() throws IOException {
         return new RandomAccessFileOrArray(file);
     }
     
@@ -187,7 +187,7 @@ public class PRTokeniser {
         return generation;
     }
     
-    public void backOnePosition(int ch) {
+    public void backOnePosition(int ch) throws IOException {
         if (ch != -1)
             file.pushBack((byte)ch);
     }
@@ -544,7 +544,7 @@ public class PRTokeniser {
 		c = read();
 	    }
         }
-        if (ptr >= len) {
+		if( len <= ptr  ) {
             eol = false;
             while (!eol) {
                 switch (c = read()) {

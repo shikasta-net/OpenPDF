@@ -52,6 +52,8 @@ package com.lowagie.text;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * An <CODE>Annotation</CODE> is a little note that can be added to a page on
@@ -61,7 +63,7 @@ import java.util.HashMap;
  * @see Anchor
  */
 
-public class Annotation implements Element {
+public class Annotation implements Element, MarkupAttributes {
 
 	// membervariables
 
@@ -143,6 +145,9 @@ public class Annotation implements Element {
 	/** This is the title of the <CODE>Annotation</CODE>. */
 	protected HashMap annotationAttributes = new HashMap();
 
+	/** Contains extra markupAttributes */
+	protected Properties markupAttributes = null;
+
 	/** This is the lower left x-value */
 	protected float llx = Float.NaN;
 
@@ -183,6 +188,7 @@ public class Annotation implements Element {
     public Annotation(Annotation an) {
         annotationtype = an.annotationtype;
         annotationAttributes = an.annotationAttributes;
+        markupAttributes = an.markupAttributes;
         llx = an.llx;
         lly = an.lly;
         urx = an.urx;
@@ -392,6 +398,79 @@ public class Annotation implements Element {
 		annotationAttributes.put(DEFAULTDIR, defaultdir);
 	}
 
+	/**
+	 * Returns an <CODE>Annotation</CODE> that has been constructed taking in
+	 * account the value of some <VAR>attributes </VAR>.
+	 * 
+	 * @param attributes
+	 *            Some attributes
+	 */
+
+	public Annotation(Properties attributes) {
+		String value = (String) attributes.remove(ElementTags.LLX);
+		if (value != null) {
+			llx = Float.valueOf(value + "f").floatValue();
+		}
+		value = (String) attributes.remove(ElementTags.LLY);
+		if (value != null) {
+			lly = Float.valueOf(value + "f").floatValue();
+		}
+		value = (String) attributes.remove(ElementTags.URX);
+		if (value != null) {
+			urx = Float.valueOf(value + "f").floatValue();
+		}
+		value = (String) attributes.remove(ElementTags.URY);
+		if (value != null) {
+			ury = Float.valueOf(value + "f").floatValue();
+		}
+		String title = (String) attributes.remove(ElementTags.TITLE);
+		String text = (String) attributes.remove(ElementTags.CONTENT);
+		if (title != null || text != null) {
+			annotationtype = TEXT;
+		} else if ((value = (String) attributes.remove(ElementTags.URL)) != null) {
+			annotationtype = URL_AS_STRING;
+			annotationAttributes.put(FILE, value);
+		} else if ((value = (String) attributes.remove(ElementTags.NAMED)) != null) {
+			annotationtype = NAMED_DEST;
+			annotationAttributes.put(NAMED, Integer.valueOf(value));
+		} else {
+			String file = (String) attributes.remove(ElementTags.FILE);
+			String destination = (String) attributes
+					.remove(ElementTags.DESTINATION);
+			String page = (String) attributes.remove(ElementTags.PAGE);
+			if (file != null) {
+				annotationAttributes.put(FILE, file);
+				if (destination != null) {
+					annotationtype = FILE_DEST;
+					annotationAttributes.put(DESTINATION, destination);
+				} else if (page != null) {
+					annotationtype = FILE_PAGE;
+					annotationAttributes.put(FILE, file);
+					annotationAttributes.put(PAGE, Integer.valueOf(page));
+				}
+			} else if ((value = (String) attributes.remove(ElementTags.NAMED)) != null) {
+				annotationtype = LAUNCH;
+				annotationAttributes.put(APPLICATION, value);
+				annotationAttributes.put(PARAMETERS, attributes
+						.remove(ElementTags.PARAMETERS));
+				annotationAttributes.put(OPERATION, attributes
+						.remove(ElementTags.OPERATION));
+				annotationAttributes.put(DEFAULTDIR, attributes
+						.remove(ElementTags.DEFAULTDIR));
+			}
+		}
+		if (annotationtype == TEXT) {
+			if (title == null)
+				title = "";
+			if (text == null)
+				text = "";
+			annotationAttributes.put(TITLE, title);
+			annotationAttributes.put(CONTENT, text);
+		}
+		if (attributes.size() > 0)
+			setMarkupAttributes(attributes);
+	}
+
 	// implementation of the Element-methods
 
 	/**
@@ -402,6 +481,8 @@ public class Annotation implements Element {
 	public int type() {
 		return Element.ANNOTATION;
 	}
+
+	// methods
 
 	/**
 	 * Processes the element by adding it (or the different parts) to an <CODE>
@@ -598,4 +679,53 @@ public class Annotation implements Element {
 		return true;
 	}
 
+	/**
+	 * Checks if a given tag corresponds with this object.
+	 * 
+	 * @param tag
+	 *            the given tag
+	 * @return true if the tag corresponds
+	 */
+
+	public static boolean isTag(String tag) {
+		return ElementTags.ANNOTATION.equals(tag);
+	}
+
+	/**
+	 * @see pdftk.com.lowagie.text.MarkupAttributes#setMarkupAttribute(java.lang.String,
+	 *      java.lang.String)
+	 */
+	public void setMarkupAttribute(String name, String value) {
+		if (markupAttributes == null) markupAttributes = new Properties();
+		markupAttributes.put(name, value);
+	}
+
+	/**
+	 * @see pdftk.com.lowagie.text.MarkupAttributes#setMarkupAttributes(java.util.Properties)
+	 */
+	public void setMarkupAttributes(Properties markupAttributes) {
+		this.markupAttributes = markupAttributes;
+	}
+
+	/**
+	 * @see pdftk.com.lowagie.text.MarkupAttributes#getMarkupAttribute(java.lang.String)
+	 */
+	public String getMarkupAttribute(String name) {
+		return (markupAttributes == null) ? null : String
+				.valueOf(markupAttributes.get(name));
+	}
+
+	/**
+	 * @see pdftk.com.lowagie.text.MarkupAttributes#getMarkupAttributeNames()
+	 */
+	public Set getMarkupAttributeNames() {
+		return Chunk.getKeySet(markupAttributes);
+	}
+
+	/**
+	 * @see pdftk.com.lowagie.text.MarkupAttributes#getMarkupAttributes()
+	 */
+	public Properties getMarkupAttributes() {
+		return markupAttributes;
+	}
 }

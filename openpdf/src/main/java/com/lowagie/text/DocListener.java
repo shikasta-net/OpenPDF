@@ -164,4 +164,71 @@ public interface DocListener extends ElementListener {
     
     public void resetFooter(); // [L12]
 
+
+/**
+ * Signals that an new page has to be started.
+ *
+ * @return	<CODE>true</CODE> if the page was added, <CODE>false</CODE> if not.
+ * @throws	DocumentException	when a document isn't open yet, or has been closed
+ */
+    
+    public boolean newPage() throws DocumentException;
+    
+/**
+ * Changes the header of this document.
+ *
+ * @param	header		the new header
+ */
+    
+    // public void setHeader(HeaderFooter header); ssteward: dropped in 1.44
+    
+/**
+ * Resets the header of this document.
+ */
+    
+    // public void resetHeader(); ssteward: dropped in 1.44
+    
+/**
+ * Changes the footer of this document.
+ *
+ * @param	footer		the new footer
+ */
+    
+    // public void setFooter(HeaderFooter footer); ssteward: dropped in 1.44
+    
+/**
+ * Resets the footer of this document.
+ */
+    
+    // public void resetFooter(); ssteward: dropped in 1.44
+    
+/**
+ * Sets the page number to 0.
+ */
+    
+    public void resetPageCount();
+    
+/**
+ * Sets the page number.
+ *
+ * @param	pageN		the new page number
+ */
+    
+    public void setPageCount(int pageN);
+    
+/**
+ * Clears text wrapping around images (if applicable).
+ * Method suggested by Pelikan Stephan
+ * @throws DocumentException
+ */
+	public void clearTextWrap() throws DocumentException;
+    
+/**
+ * Signals that the <CODE>Document</CODE> was closed and that no other
+ * <CODE>Elements</CODE> will be added.
+ * <P>
+ * The outputstream of every writer implementing <CODE>DocListener</CODE> will be closed.
+ */
+    
+    public void close();
 }

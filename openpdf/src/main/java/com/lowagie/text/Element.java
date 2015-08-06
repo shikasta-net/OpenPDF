@@ -69,6 +69,7 @@ import java.util.ArrayList;
  * @see Cell
  * @see Chapter
  * @see Chunk
+ * @see Graphic
  * @see Header
  * @see Image
  * @see Jpeg
@@ -172,6 +173,9 @@ public interface Element {
 
 	/** This is a possible type of <CODE>Element</CODE>. */
 	public static final int IMGTEMPLATE = 35;
+
+	/** This is a possible type of <CODE>Element</CODE>. */
+	public static final int GRAPHIC = 39;
 
 	/**
 	 * This is a possible type of <CODE>Element</CODE>.

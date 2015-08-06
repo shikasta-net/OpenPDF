@@ -53,6 +53,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Properties;
+
+import pdftk.com.lowagie.text.markup.MarkupTags;
+import pdftk.com.lowagie.text.markup.MarkupParser;
 
 /**
  * An <CODE>Anchor</CODE> can be a reference or a destination of a reference.
@@ -71,12 +75,15 @@ import java.util.Iterator;
  * @see		Phrase
  */
 
-public class Anchor extends Phrase {
+public class Anchor extends Phrase implements TextElementArray, MarkupAttributes {
 
 	// constant
 	private static final long serialVersionUID = -852278536049236911L;
 	
     // membervariables
+
+/** This is the anchor tag. */
+    public static final String ANCHOR = "anchor";
     
 	/** This is the name of the <CODE>Anchor</CODE>. */
     protected String name = null;
@@ -170,7 +177,7 @@ public class Anchor extends Phrase {
      * Constructs an <CODE>Anchor</CODE> with a certain <CODE>Phrase</CODE>.
      *
      * @param	phrase		a <CODE>Phrase</CODE>
-     */    
+     *    
     public Anchor(Phrase phrase) {
     	super(phrase);
     	if (phrase instanceof Anchor) {
@@ -179,7 +186,40 @@ public class Anchor extends Phrase {
     		setReference(a.reference);
     	}
     }
+      */
+
+    /**
+ * Returns an <CODE>Anchor</CODE> that has been constructed taking in account
+ * the value of some <VAR>attributes</VAR>.
+ *
+ * @param	attributes		Some attributes
+ */
     
+    public Anchor(Properties attributes) {
+        this("", FontFactory.getFont(attributes));
+        String value;
+        if ((value = (String)attributes.remove(ElementTags.ITEXT)) != null) {
+            Chunk chunk = new Chunk(value);
+            if ((value = (String)attributes.remove(ElementTags.GENERICTAG)) != null) {
+                chunk.setGenericTag(value);
+            }
+            add(chunk);
+        }
+        if ((value = (String)attributes.remove(ElementTags.LEADING)) != null) {
+            setLeading(Float.valueOf(value + "f").floatValue());
+        }
+        else if ((value = (String)attributes.remove(MarkupTags.CSS_KEY_LINEHEIGHT)) != null) {
+            setLeading(MarkupParser.parseLength(value));
+        }
+        if ((value = (String)attributes.remove(ElementTags.NAME)) != null) {
+            setName(value);
+        }
+        if ((value = (String)attributes.remove(ElementTags.REFERENCE)) != null) {
+            setReference(value);
+        }
+        if (attributes.size() > 0) setMarkupAttributes(attributes);
+    }
+
     // implementation of the Element-methods
     
     /**
@@ -252,6 +292,17 @@ public class Anchor extends Phrase {
     // methods
     
     /**
+ * Gets an iterator of <CODE>Element</CODE>s.
+ *
+ * @return	an <CODE>Iterator</CODE>
+ */
+    
+    // suggestion by by Curt Thompson
+    public Iterator getElements() {
+        return this.iterator();
+    }
+    
+/**
      * Sets the name of this <CODE>Anchor</CODE>.
      *
      * @param	name		a new name
@@ -303,4 +354,14 @@ public class Anchor extends Phrase {
         }
     }
 
+/**
+ * Checks if a given tag corresponds with this object.
+ *
+ * @param   tag     the given tag
+ * @return  true if the tag corresponds
+ */
+    
+    public static boolean isTag(String tag) {
+        return ElementTags.ANCHOR.equals(tag);
+    }
 }

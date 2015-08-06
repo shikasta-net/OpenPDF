@@ -272,8 +272,28 @@ public class Document implements DocListener {
         if (close) {
 			throw new DocumentException(MessageLocalization.getComposedMessage("the.document.has.been.closed.you.can.t.add.any.elements"));
         }
-		if (!open && element.isContent()) {
-			throw new DocumentException(MessageLocalization.getComposedMessage("the.document.is.not.open.yet.you.can.only.add.meta.information"));
+        int type = element.type();
+        if (open) {
+			if (!(type == Element.CHUNK || type == Element.PHRASE
+					|| type == Element.PARAGRAPH || type == Element.TABLE
+					|| type == Element.PTABLE
+					|| type == Element.MULTI_COLUMN_TEXT
+					|| type == Element.ANCHOR || type == Element.ANNOTATION
+					|| type == Element.CHAPTER || type == Element.SECTION
+					|| type == Element.LIST || type == Element.LISTITEM
+					|| type == Element.RECTANGLE || type == Element.JPEG
+					|| type == Element.IMGRAW || type == Element.IMGTEMPLATE || type == Element.GRAPHIC)) {
+				throw new DocumentException(
+						"The document is open; you can only add Elements with content.");
+			}
+		} else {
+			if (!(type == Element.HEADER || type == Element.TITLE
+					|| type == Element.SUBJECT || type == Element.KEYWORDS
+					|| type == Element.AUTHOR || type == Element.PRODUCER
+					|| type == Element.CREATOR || type == Element.CREATIONDATE)) {
+				throw new DocumentException(
+						"The document is not open yet; you can only add Meta information.");
+            }
         }
         boolean success = false;
         DocListener listener;
@@ -366,9 +386,11 @@ public class Document implements DocListener {
  *
 	 * @return <CODE>true</CODE> if the page was added, <CODE>false</CODE>
 	 *         if not.
+	 * @throws DocumentException
+	 *             when a document isn't open yet, or has been closed
  */
     
-    public boolean newPage() {
+    public boolean newPage() throws DocumentException {
         if (!open || close) {
             return false;
         }
@@ -387,6 +409,7 @@ public class Document implements DocListener {
 	 *            the new header
  */
     
+    /* ssteward: dropped in 1.44*/
     public void setHeader(HeaderFooter header) {
         this.header = header;
         DocListener listener;
@@ -395,11 +418,13 @@ public class Document implements DocListener {
             listener.setHeader(header);
         }
     }
+    /**/
     
 	/**
  * Resets the header of this document.
  */
     
+    /* ssteward: dropped in 1.44*/
     public void resetHeader() {
         this.header = null;
         DocListener listener;
@@ -408,6 +433,7 @@ public class Document implements DocListener {
             listener.resetHeader();
         }
     }
+    /**/
     
 	/**
  * Changes the footer of this document.
@@ -416,6 +442,7 @@ public class Document implements DocListener {
 	 *            the new footer
  */
     
+    /* ssteward: dropped in 1.44*/
     public void setFooter(HeaderFooter footer) {
         this.footer = footer;
         DocListener listener;
@@ -424,11 +451,13 @@ public class Document implements DocListener {
             listener.setFooter(footer);
         }
     }
+    /**/
     
 	/**
  * Resets the footer of this document.
  */
     
+    /* ssteward: dropped in 1.44*/
     public void resetFooter() {
         this.footer = null;
         DocListener listener;
@@ -437,6 +466,7 @@ public class Document implements DocListener {
             listener.resetFooter();
         }
     }
+    /**/
     
 	/**
  * Sets the page number to 0.
@@ -868,6 +898,19 @@ public class Document implements DocListener {
         return this.htmlStyleClass;
     }
     
+	/**
+ 	 * @see pdftk.com.lowagie.text.DocListener#clearTextWrap()
+     */
+	public void clearTextWrap() throws DocumentException {
+		if (open && !close) {
+			DocListener listener;
+			for (Iterator iterator = listeners.iterator(); iterator.hasNext();) {
+				listener = (DocListener) iterator.next();
+				listener.clearTextWrap();
+			}
+		}
+	}
+
     /**
      * Set the margin mirroring. It will mirror right/left margins for odd/even pages.
      * <p>
